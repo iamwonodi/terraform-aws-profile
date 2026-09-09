@@ -45,6 +45,40 @@ variable "role_description" {
   default     = "IAM role for EC2-based workloads."
 }
 
+variable "path" {
+  type        = string
+  description = "IAM path applied to both the role and the instance profile. Useful when an organization scopes permissions boundaries, SCPs, or role-creation policies by IAM path."
+  default     = "/"
+
+  validation {
+    condition     = can(regex("^/([[:print:]]*/)?$", var.path))
+    error_message = "path must start and end with '/', for example \"/\" or \"/platform/\"."
+  }
+}
+
+variable "max_session_duration" {
+  type        = number
+  description = "Maximum session duration, in seconds, for the IAM role. AWS allows 3600 (1 hour) through 43200 (12 hours)."
+  default     = 3600
+
+  validation {
+    condition     = var.max_session_duration >= 3600 && var.max_session_duration <= 43200
+    error_message = "max_session_duration must be between 3600 and 43200 seconds."
+  }
+}
+
+variable "permissions_boundary" {
+  type        = string
+  description = "Optional IAM permissions boundary policy ARN attached to the role. Caps the role's effective permissions regardless of what's granted via enable_ssm_access, enable_ecr_read_access, enable_route53_write_access, or additional_policy_arns."
+  default     = null
+}
+
+variable "force_detach_policies" {
+  type        = bool
+  description = "Whether to force-detach any attached managed and inline policies during role deletion. Without this, Terraform (or a manual delete) fails if policies are still attached; useful in a dev environment where the role is torn down often, less commonly wanted in production."
+  default     = false
+}
+
 
 ################################################################################
 # MANAGED ACCESS OPTIONS

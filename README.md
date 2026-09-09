@@ -155,11 +155,27 @@ additional_policy_arns = [
 
 This allows the module to remain reusable without requiring a new module release whenever a workload needs another managed policy.
 
+## Role Configuration
+
+```hcl
+path                  = "/"       # default
+max_session_duration  = 3600      # default, seconds -- AWS allows 3600 to 43200
+permissions_boundary  = null      # default
+force_detach_policies = false     # default
+```
+
+| Field | Purpose |
+| --- | --- |
+| `path` | IAM path applied to both the role and instance profile. Useful when an org scopes permissions boundaries or role-creation policies by path. |
+| `max_session_duration` | How long an assumed session lasts, in seconds. |
+| `permissions_boundary` | Caps the role's effective permissions regardless of what's granted through `enable_ssm_access`, `enable_ecr_read_access`, `enable_route53_write_access`, or `additional_policy_arns`. Recommended whenever the role's combined access could end up broader than intended. |
+| `force_detach_policies` | Lets Terraform delete the role even with policies still attached. Useful for a dev environment torn down often; usually left `false` in production. |
+
 ## Example Usage
 
 ```hcl
 module "aws_profile" {
-  source = "git::https://github.com/iamwonodi/terraform-aws-profile.git?ref=v1.0.0"
+  source = "git::https://github.com/iamwonodi/terraform-aws-profile.git?ref=v1.1.0"
 
   project_name  = "blueprints"
   environment   = "development"
@@ -201,7 +217,7 @@ The generated profile therefore becomes the bridge between the IAM role and the 
 
 ```hcl
 module "dns_profile" {
-  source = "git::https://github.com/iamwonodi/terraform-aws-profile.git?ref=v1.0.0"
+  source = "git::https://github.com/iamwonodi/terraform-aws-profile.git?ref=v1.1.0"
 
   project_name = "blueprints"
   environment  = "production"
@@ -246,6 +262,18 @@ module "dns_profile" {
 
 * Terraform `>= 1.6.0`
 * AWS provider `>= 6.0, < 7.0`
+
+## Versioning
+
+This module follows Semantic Versioning.
+
+Current release:
+
+```text
+v1.1.0
+```
+
+`v1.1.0` is a **minor** release relative to `v1.0.0` -- fully backward compatible. Adds `path`, `max_session_duration`, `permissions_boundary`, and `force_detach_policies`, all optional and all defaulting to prior behavior. No existing input was removed, renamed, or had its default changed.
 
 ## Security Considerations
 

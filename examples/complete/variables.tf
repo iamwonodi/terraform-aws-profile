@@ -53,6 +53,12 @@ variable "additional_policy_arns" {
   default     = []
 }
 
+variable "permissions_boundary" {
+  description = "Optional IAM permissions boundary policy ARN."
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   type        = map(string)
   description = "Additional tags applied to the IAM role and instance profile."

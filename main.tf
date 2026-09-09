@@ -24,10 +24,15 @@
 
 resource "aws_iam_role" "this" {
   name = local.role_name
+  path = var.path
 
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
 
   description = var.role_description
+
+  max_session_duration  = var.max_session_duration
+  permissions_boundary  = var.permissions_boundary
+  force_detach_policies = var.force_detach_policies
 
   tags = merge(
     local.common_tags,
@@ -123,6 +128,7 @@ resource "aws_iam_role_policy_attachment" "additional" {
 
 resource "aws_iam_instance_profile" "this" {
   name = local.instance_profile_name
+  path = var.path
 
   role = aws_iam_role.this.name
 
