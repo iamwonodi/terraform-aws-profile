@@ -134,7 +134,10 @@ variable "hosted_zone_id" {
 ################################################################################
 
 variable "additional_policy_arns" {
-  type        = set(string)
+  # A list, not a set: a set of ARNs created in the same apply has no known size
+  # or order when the plan is made, so the attachments could not be keyed. A set
+  # passed by a caller still converts to a list.
+  type        = list(string)
   description = "Additional IAM managed policy ARNs to attach to the role."
   default     = []
 
@@ -145,6 +148,11 @@ variable "additional_policy_arns" {
     ])
 
     error_message = "additional_policy_arns must contain only non-empty policy ARNs."
+  }
+
+  validation {
+    condition     = length(distinct(var.additional_policy_arns)) == length(var.additional_policy_arns)
+    error_message = "additional_policy_arns must not list the same policy twice."
   }
 }
 

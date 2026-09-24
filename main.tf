@@ -108,7 +108,10 @@ resource "aws_iam_role_policy" "route53_write" {
 ################################################################################
 
 resource "aws_iam_role_policy_attachment" "additional" {
-  for_each = toset(var.additional_policy_arns)
+  # Keyed by position, not by ID: an ID created in the same apply is unknown when
+  # the plan is made, and for_each must know its keys then. Duplicates are
+  # refused by the variable's validation.
+  for_each = { for index, arn in var.additional_policy_arns : tostring(index) => arn }
 
   role = aws_iam_role.this.name
 

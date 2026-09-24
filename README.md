@@ -175,7 +175,7 @@ force_detach_policies = false     # default
 
 ```hcl
 module "aws_profile" {
-  source = "git::https://github.com/iamwonodi/terraform-aws-profile.git?ref=v1.1.0"
+  source = "git::https://github.com/iamwonodi/terraform-aws-profile.git?ref=v1.1.1"
 
   project_name  = "blueprints"
   environment   = "development"
@@ -217,7 +217,7 @@ The generated profile therefore becomes the bridge between the IAM role and the 
 
 ```hcl
 module "dns_profile" {
-  source = "git::https://github.com/iamwonodi/terraform-aws-profile.git?ref=v1.1.0"
+  source = "git::https://github.com/iamwonodi/terraform-aws-profile.git?ref=v1.1.1"
 
   project_name = "blueprints"
   environment  = "production"
@@ -270,8 +270,13 @@ This module follows Semantic Versioning.
 Current release:
 
 ```text
-v1.1.0
+v1.1.1
 ```
+
+`v1.1.1` is a **patch** release relative to `v1.1.0`. It fixes the first plan of a fresh environment: the policy attachments (`aws_iam_role_policy_attachment.additional`) were keyed by the IDs passed in, which are unknown until apply when those resources are created in the same run, so the plan failed with `Invalid for_each argument`. They are now keyed by position in the list. `additional_policy_arns` is now a list rather than a set (a set passed in still converts); no other input or output changed; listing the same ID twice is now refused rather than silently merged.
+
+**Upgrading an environment already applied with `v1.1.0`:** the plan re-creates those resources once under their new keys. To keep them in place, add a `moved` block per entry in the calling configuration, for example `moved { from = module.<name>.<resource>["<id>"]  to = module.<name>.<resource>["0"] }`. Keep the list's order stable afterwards: reordering it re-creates the moved entries.
+
 
 `v1.1.0` is a **minor** release relative to `v1.0.0` -- fully backward compatible. Adds `path`, `max_session_duration`, `permissions_boundary`, and `force_detach_policies`, all optional and all defaulting to prior behavior. No existing input was removed, renamed, or had its default changed.
 
